@@ -10,5 +10,4 @@ numpy
 jinja2
 google-generativeai
 setuptools
-google-adk0.0.0.0
-
+google-adk
