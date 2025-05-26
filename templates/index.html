@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html
+  lang="en"
+  x-data="{ darkMode: false }"
+  :class="darkMode ? 'dark' : ''"
+  class="transition-colors duration-300"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🎓 AI Tutor Multi-Agent System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script
+      src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
+      defer
+    ></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: "#f0fdfa",
+                100: "#ccfbf1",
+                200: "#99f6e4",
+                300: "#5eead4",
+                400: "#2dd4bf",
+                500: "#14b8a6",
+                600: "#0d9488",
+                700: "#0f766e",
+                800: "#115e59",
+                900: "#134e4a",
+              },
+              secondary: {
+                50: "#f5f3ff",
+                100: "#ede9fe",
+                200: "#ddd6fe",
+                300: "#c4b5fd",
+                400: "#a78bfa",
+                500: "#8b5cf6",
+                600: "#7c3aed",
+                700: "#6d28d9",
+                800: "#5b21b6",
+                900: "#4c1d95",
+              },
+            },
+            animation: {
+              "bounce-slow": "bounce 3s linear infinite",
+              "pulse-slow": "pulse 5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+              gradient: "gradient 8s ease infinite",
+            },
+            keyframes: {
+              gradient: {
+                "0%, 100%": {
+                  "background-position": "0% 50%",
+                },
+                "50%": {
+                  "background-position": "100% 50%",
+                },
+              },
+            },
+            backgroundSize: {
+              "size-200": "200% 200%",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+      * {
+        font-family: "Inter", sans-serif;
+        scroll-behavior: smooth;
+      }
+
+      .gradient-bg {
+        background-size: 200% 200%;
+        animation: gradient 15s ease infinite;
+      }
+
+      @keyframes gradient {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      .chat-bubble {
+        animation: slideInUp 0.3s ease-out;
+      }
+
+      @keyframes slideInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .typing-indicator {
+        animation: pulse 1.5s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+
+      .scroll-hidden::-webkit-scrollbar {
+        display: none;
+      }
+
+      .agent-badge {
+        background-size: 200% 200%;
+        animation: gradient 4s ease infinite;
+      }
+
+      .agent-math {
+        background: linear-gradient(-45deg, #3b82f6, #06b6d4, #3b82f6);
+      }
+
+      .agent-physics {
+        background: linear-gradient(-45deg, #8b5cf6, #6366f1, #8b5cf6);
+      }
+
+      .agent-biology {
+        background: linear-gradient(-45deg, #10b981, #059669, #10b981);
+      }
+
+      .agent-chemistry {
+        background: linear-gradient(-45deg, #f59e0b, #d97706, #f59e0b);
+      }
+
+      .agent-web {
+        background: linear-gradient(-45deg, #ef4444, #dc2626, #ef4444);
+      }
+
+      .agent-orchestrator {
+        background: linear-gradient(-45deg, #6366f1, #8b5cf6, #6366f1);
+      }
+
+      .welcome-card {
+        transition: all 0.3s ease;
+      }
+
+      .welcome-card:hover {
+        transform: translateY(-10px);
+      }
+
+      .hover-scale {
+        transition: all 0.2s ease;
+      }
+
+      .hover-scale:hover {
+        transform: scale(1.05);
+      }
+
+      .sidebar-link {
+        transition: all 0.2s ease;
+      }
+
+      .sidebar-link:hover {
+        transform: translateX(5px);
+      }
+
+      .bg-gradient-animation {
+        background-size: 200% 200%;
+        animation: gradient 15s ease infinite;
+        background-image: linear-gradient(-45deg, #0ea5e9, #0284c7, #0369a1);
+      }
+
+      /* Enhanced Dark Mode Styles */
+      .dark {
+        color-scheme: dark;
+      }
+
+      .dark body {
+        background-color: #111827;
+        color: #f3f4f6;
+      }
+
+      .dark .bg-white {
+        background-color: #1f2937;
+      }
+
+      .dark .text-gray-700 {
+        color: #d1d5db;
+      }
+
+      .dark .border {
+        border-color: #374151;
+      }
+
+      .dark .shadow-lg {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4),
+          0 4px 6px -2px rgba(0, 0, 0, 0.2);
+      }
+
+      /* Theme toggle button animation */
+      .theme-toggle-icon {
+        transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+      }
+
+      /* Enhanced chat styles */
+      .message-text {
+        position: relative;
+        overflow: hidden;
+      }
+
+      textarea {
+        transition: height 0.2s ease-out;
+      }
+
+      /* Interactive chat input animation */
+      @keyframes pulse-ring {
+        0% {
+          box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.7);
+        }
+        70% {
+          box-shadow: 0 0 0 10px rgba(20, 184, 166, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(20, 184, 166, 0);
+        }
+      }
+
+      .chat-container {
+        scroll-behavior: smooth;
+      }
+
+      /* Chat message animation */
+      .chat-bubble.new-message {
+        animation: fadeInUp 0.5s ease forwards;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Sidebar overlay for mobile */
+      .sidebar-overlay {
+        transition: opacity 0.3s ease-in-out;
+        backdrop-filter: blur(2px);
+      }
+
+      
+
+    </style>
+  </head>
+  <body
+    class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-all duration-300"
+    x-data="chatApp()"
+  >
+    <!-- Sidebar Overlay for Mobile -->
+    <div
+      x-show="sidebarOpen && window.innerWidth < 1024"
+      @click="sidebarOpen = false"
+      class="fixed inset-0 bg-black bg-opacity-50 z-40 sidebar-overlay lg:hidden"
+      x-transition:enter="transition-opacity ease-linear duration-300"
+      x-transition:enter-start="opacity-0"
+      x-transition:enter-end="opacity-100"
+      x-transition:leave="transition-opacity ease-linear duration-300"
+      x-transition:leave-start="opacity-100"
+      x-transition:leave-end="opacity-0"
+    ></div>
+
+    <!-- Main container -->
+    <div class="flex h-screen w-full">
+      <!-- Sidebar -->
+      <div
+        class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 border-r dark:border-gray-700 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col shadow-lg"
+        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+      >
+        <!-- Logo -->
+        <div
+          class="p-4 flex items-center justify-between border-b dark:border-gray-700"
+        >
+          <div class="flex items-center space-x-2">
+            <div class="flex items-center">
+              <div
+                class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-secondary-600 flex items-center justify-center shadow-lg rotate-3 hover:rotate-0 transition-all duration-300"
+              >
+                <i
+                  class="fa-solid fa-robot text-white text-lg transform hover:scale-110 transition-transform"
+                ></i>
+              </div>
+              <span
+                class="ml-2 text-xl bg-gradient-to-r from-primary-500 to-secondary-600 text-transparent bg-clip-text font-bold"
+                >AI Tutor</span
+              >
+            </div>
+          </div>
+          <button
+            @click="sidebarOpen = false"
+            class="lg:hidden text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          >
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+
+        <!-- Sidebar content -->
+        <div class="flex-1 overflow-y-auto scroll-hidden">
+          <div class="p-4">
+            <h2
+              class="text-sm uppercase tracking-wider text-gray-500 dark:text-gray-400 font-medium mb-3"
+            >
+              Subjects
+            </h2>
+
+            <div class="space-y-1">
+              <a
+                href="#"
+                class="sidebar-link flex items-center p-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg group"
+              >
+                <i
+                  class="fa-solid fa-square-root-variable w-5 text-primary-500 mr-3 group-hover:scale-110 transition-transform"
+                ></i>
+                <span class="font-medium">Mathematics</span>
+              </a>
+              <a
+                href="#"
+                class="sidebar-link flex items-center p-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg group"
+              >
+                <i
+                  class="fa-solid fa-atom w-5 text-secondary-500 mr-3 group-hover:scale-110 transition-transform"
+                ></i>
+                <span class="font-medium">Physics</span>
+              </a>
+              <a
+                href="#"
+                class="sidebar-link flex items-center p-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg group"
+              >
+                <i
+                  class="fa-solid fa-dna w-5 text-green-500 mr-3 group-hover:scale-110 transition-transform"
+                ></i>
+                <span class="font-medium">Biology</span>
+              </a>
+              <a
+                href="#"
+                class="sidebar-link flex items-center p-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg group"
+              >
+                <i
+                  class="fa-solid fa-flask w-5 text-amber-500 mr-3 group-hover:scale-110 transition-transform"
+                ></i>
+                <span class="font-medium">Chemistry</span>
+              </a>
+              <a
+                href="#"
+                class="sidebar-link flex items-center p-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg group"
+              >
+                <i
+                  class="fa-solid fa-globe w-5 text-red-500 mr-3 group-hover:scale-110 transition-transform"
+                ></i>
+                <span class="font-medium">Web Search</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Session info and buttons -->
+        <div class="border-t dark:border-gray-700 p-4">
+          <div class="flex flex-col space-y-3">
+            <div
+              class="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg"
+            >
+              <p class="flex justify-between items-center">
+                <span>User ID:</span>
+                <span
+                  class="font-medium text-gray-700 dark:text-gray-300 truncate ml-2"
+                  x-text="userId"
+                ></span>
+              </p>
+              <p class="flex justify-between items-center mt-1">
+                <span>Session ID:</span>
+                <span
+                  class="font-medium text-gray-700 dark:text-gray-300 truncate ml-2"
+                  x-text="sessionId"
+                ></span>
+              </p>
+            </div>
+
+            <button
+              @click="openUserIdModal()"
+              class="bg-white dark:bg-gray-700 border dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg px-4 py-2 text-sm hover-scale hover:shadow-md transition-all font-medium"
+            >
+              <i class="fa-regular fa-user mr-2"></i> Change User ID
+            </button>
+
+            <button
+              @click="newSession()"
+              class="bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg px-4 py-2 text-sm hover-scale hover:shadow-md transition-all font-medium"
+            >
+              <i class="fa-solid fa-plus mr-2"></i> New Session
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main content -->
+      <div class="flex-1 flex flex-col min-w-0">
+        <!-- Navbar -->
+        <nav
+          class="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 flex-shrink-0"
+        >
+          <div class="px-4 sm:px-6">
+            <div class="flex justify-between items-center h-16">
+              <div class="flex items-center">
+                <button
+                  @click="sidebarOpen = !sidebarOpen"
+                  class="lg:hidden mr-4 text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+                <span
+                  class="text-xl font-semibold text-gray-700 dark:text-white"
+                >
+                  AI Tutor
+                </span>
+              </div>
+              <div class="flex items-center">
+                <button
+                  @click="toggleDarkMode()"
+                  class="relative w-11 h-6 flex items-center justify-center rounded-full p-1 transition-all duration-300 overflow-hidden shadow-md hover:scale-105"
+                  :class="darkMode ? 'bg-primary-700' : 'bg-gray-200'"
+                >
+                  <div class="absolute inset-0 flex items-center">
+                    <div
+                      class="w-5 h-5 rounded-full transform transition-transform duration-500 flex items-center justify-center shadow-sm"
+                      :class="darkMode ? 'translate-x-5 bg-white' : 'translate-x-0 bg-white'"
+                    >
+                      <i
+                        class="fa-solid text-xs transform transition-all duration-500"
+                        :class="darkMode ? 'fa-moon text-primary-600 rotate-[360deg] scale-110' : 'fa-sun text-amber-500 rotate-0 scale-110'"
+                      ></i>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        <!-- Chat area -->
+        <div
+          class="flex-1 flex flex-col overflow-hidden bg-gray-50 dark:bg-gray-900"
+        >
+          <div
+            class="flex-1 overflow-y-auto p-4 scroll-hidden"
+            id="chatContainer"
+          >
+            <!-- Welcome screen (shown when no messages) -->
+            <template x-if="messages.length === 0">
+              <div class="max-w-5xl mx-auto">
+                <div class="text-center py-8">
+                  <div class="w-20 h-20 mx-auto mb-6 relative">
+                    <div
+                      class="w-16 h-16 absolute top-2 left-2 bg-primary-500 opacity-20 rounded-full animate-pulse-slow"
+                    ></div>
+                    <div
+                      class="w-full h-full bg-gradient-to-r from-primary-400 to-secondary-500 rounded-full flex items-center justify-center shadow-xl text-3xl animate-bounce-slow"
+                    >
+                      🎓
+                    </div>
+                  </div>
+                  <h1
+                    class="text-3xl font-bold text-gray-800 dark:text-white mb-4 bg-gradient-to-r from-primary-500 to-secondary-600 text-transparent bg-clip-text"
+                  >
+                    Welcome to AI Tutor
+                  </h1>
+                  <p
+                    class="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-8"
+                  >
+                    Your smart educational assistant with specialized agents for
+                    mathematics, physics, biology, chemistry, and web research.
+                  </p>
+
+                  <!-- Agent cards -->
+                  <div
+                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                  >
+                    <!-- Math Agent Card -->
+                    <div
+                      class="welcome-card bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden"
+                    >
+                      <div class="h-2 agent-math"></div>
+                      <div class="p-6">
+                        <div class="flex items-center mb-4">
+                          <div
+                            class="w-12 h-12 rounded-full agent-math flex items-center justify-center text-white shadow-lg"
+                          >
+                            <i
+                              class="fa-solid fa-square-root-variable text-lg"
+                            ></i>
+                          </div>
+                          <h3
+                            class="ml-3 font-semibold text-lg text-gray-800 dark:text-white"
+                          >
+                            Math Agent
+                          </h3>
+                        </div>
+                        <p
+                          class="text-sm text-gray-500 dark:text-gray-400 mb-5"
+                        >
+                          Algebra, calculus, equations, and more.
+                        </p>
+                        <div class="space-y-2">
+                          <button
+                            @click="quickQuestion('What is the derivative of x^3 - 2x + 5?')"
+                            class="text-left text-xs w-full px-3 py-2 border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition-all"
+                          >
+                            What is the derivative of x³ - 2x + 5?
+                          </button>
+                          <button
+                            @click="quickQuestion('Can you solve 3x + 7 = 22?')"
+                            class="text-left text-xs w-full px-3 py-2 border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition-all"
+                          >
+                            Can you solve 3x + 7 = 22?
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Physics Agent Card -->
+                    <div
+                      class="welcome-card bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden"
+                    >
+                      <div class="h-2 agent-physics"></div>
+                      <div class="p-6">
+                        <div class="flex items-center mb-4">
+                          <div
+                            class="w-12 h-12 rounded-full agent-physics flex items-center justify-center text-white shadow-lg"
+                          >
+                            <i class="fa-solid fa-atom text-lg"></i>
+                          </div>
+                          <h3
+                            class="ml-3 font-semibold text-lg text-gray-800 dark:text-white"
+                          >
+                            Physics Agent
+                          </h3>
+                        </div>
+                        <p
+                          class="text-sm text-gray-500 dark:text-gray-400 mb-5"
+                        >
+                          Forces, energy, mechanics, and more.
+                        </p>
+                        <div class="space-y-2">
+                          <button
+                            @click="quickQuestion('What is the speed of light?')"
+                            class="text-left text-xs w-full px-3 py-2 border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition-all"
+                          >
+                            What is the speed of light?
+                          </button>
+                          <button
+                            @click="quickQuestion('Calculate force with mass 10kg and acceleration 5m/s²')"
+                            class="text-left text-xs w-full px-3 py-2 border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition-all"
+                          >
+                            Calculate force: F = ma (10kg × 5m/s²)
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Web Search Agent Card -->
+                    <div
+                      class="welcome-card bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden"
+                    >
+                      <div class="h-2 agent-web"></div>
+                      <div class="p-6">
+                        <div class="flex items-center mb-4">
+                          <div
+                            class="w-12 h-12 rounded-full agent-web flex items-center justify-center text-white shadow-lg"
+                          >
+                            <i class="fa-solid fa-globe text-lg"></i>
+                          </div>
+                          <h3
+                            class="ml-3 font-semibold text-lg text-gray-800 dark:text-white"
+                          >
+                            Web Search
+                          </h3>
+                        </div>
+                        <p
+                          class="text-sm text-gray-500 dark:text-gray-400 mb-5"
+                        >
+                          Current events, research, and real-time data.
+                        </p>
+                        <div class="space-y-2">
+                          <button
+                            @click="quickQuestion('Find recent research on quantum computing')"
+                            class="text-left text-xs w-full px-3 py-2 border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition-all"
+                          >
+                            Find recent research on quantum computing
+                          </button>
+                          <button
+                            @click="quickQuestion('What are the applications of AI in education?')"
+                            class="text-left text-xs w-full px-3 py-2 border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition-all"
+                          >
+                            AI applications in education?
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <!-- Messages -->
+            <div class="max-w-4xl mx-auto">
+              <template x-for="(message, index) in messages" :key="index">
+                <div class="chat-bubble mb-4">
+                  <!-- User message -->
+                  <template x-if="message.role === 'user'">
+                    <div class="flex justify-end mb-2">
+                      <div
+                        class="bg-primary-500 text-white py-3 px-4 rounded-2xl shadow-sm max-w-xs md:max-w-md lg:max-w-lg"
+                      >
+                        <p
+                          class="whitespace-pre-wrap"
+                          x-text="message.message"
+                        ></p>
+                        <div
+                          class="text-xs text-primary-100 mt-1 text-right"
+                          x-text="formatTime(message.timestamp)"
+                        ></div>
+                      </div>
+                    </div>
+                  </template>
+
+                  <!-- Assistant message -->
+                  <template x-if="message.role === 'assistant'">
+                    <div class="flex justify-start mb-2">
+                      <div
+                        class="bg-white dark:bg-gray-800 border dark:border-gray-700 py-3 px-4 rounded-2xl shadow-sm max-w-xs md:max-w-md lg:max-w-2xl"
+                      >
+                        <!-- Agent indicator -->
+                        <div
+                          x-show="message.agent"
+                          class="flex items-center mb-2"
+                        >
+                          <span
+                            x-text="message.agent"
+                            class="text-xs px-2 py-1 rounded-full text-white font-medium"
+                            :class="{
+                              'agent-math': message.agent === 'Math Agent',
+                              'agent-physics': message.agent === 'Physics Agent',
+                              'agent-biology': message.agent === 'Biology Agent',
+                              'agent-chemistry': message.agent === 'Chemistry Agent',
+                              'agent-web': message.agent === 'Web Search',
+                              'agent-orchestrator': message.agent === 'AI Tutor'
+                            }"
+                          ></span>
+                          <i
+                            class="ml-2 fa-solid text-xs text-gray-400"
+                            :class="{
+                              'fa-square-root-variable': message.agent === 'Math Agent',
+                              'fa-atom': message.agent === 'Physics Agent',
+                              'fa-dna': message.agent === 'Biology Agent',
+                              'fa-flask': message.agent === 'Chemistry Agent',
+                              'fa-globe': message.agent === 'Web Search',
+                              'fa-robot': message.agent === 'AI Tutor'
+                            }"
+                          ></i>
+                        </div>
+                        <div
+                          class="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300"
+                        >
+                          <p
+                            class="whitespace-pre-wrap message-text"
+                            x-html="formatMessage(message.message)"
+                            x-init="$nextTick(() => animateMessage($el))"
+                          ></p>
+                        </div>
+                        <div
+                          class="text-xs text-gray-400 mt-1 text-left"
+                          x-text="formatTime(message.timestamp)"
+                        ></div>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </template>
+
+              <!-- Typing indicator -->
+              <div x-show="isLoading" class="flex justify-start mb-4">
+                <div
+                  class="bg-white dark:bg-gray-800 border dark:border-gray-700 py-3 px-4 rounded-2xl shadow-sm"
+                >
+                  <div class="flex items-center">
+                    <div class="typing-indicator flex space-x-2">
+                      <div
+                        class="w-2 h-2 rounded-full bg-gray-400 dark:bg-gray-500"
+                      ></div>
+                      <div
+                        class="w-2 h-2 rounded-full bg-gray-400 dark:bg-gray-500 animation-delay-150"
+                      ></div>
+                      <div
+                        class="w-2 h-2 rounded-full bg-gray-400 dark:bg-gray-500 animation-delay-300"
+                      ></div>
+                    </div>
+                    <span class="ml-3 text-sm text-gray-500 dark:text-gray-400"
+                      >AI Tutor is thinking...</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Input area -->
+          <div
+            class="border-t dark:border-gray-700 bg-white dark:bg-gray-800 p-4"
+          >
+            <div class="max-w-3xl mx-auto">
+              <div
+                class="flex items-center rounded-lg shadow-md bg-gray-100 dark:bg-gray-700 hover:shadow-lg transition-all duration-300 focus-within:ring-2 focus-within:ring-primary-400 dark:focus-within:ring-primary-600"
+              >
+                <div class="flex-1 relative">
+                  <textarea
+                    x-model="userInput"
+                    @keydown.enter.prevent="sendMessage()"
+                    placeholder="Ask me anything about math, physics, chemistry, biology..."
+                    class="w-full border-0 bg-transparent px-4 py-3 focus:ring-0 focus:outline-none text-gray-700 dark:text-gray-200 resize-none min-h-[44px] max-h-[120px] z-10 relative"
+                    rows="1"
+                    ref="inputField"
+                    id="chatInput"
+                    @focus="$el.parentNode.parentNode.classList.add('ring-2', 'ring-primary-400', 'dark:ring-primary-600')"
+                    @blur="$el.parentNode.parentNode.classList.remove('ring-2', 'ring-primary-400', 'dark:ring-primary-600')"
+                    x-init="$watch('messages', () => { if(messages.length > 0) setTimeout(() => $refs.inputField.focus(), 200) })"
+                  ></textarea>
+                  <div
+                    class="absolute bottom-1 right-3 text-xs font-mono text-gray-400 dark:text-gray-500 opacity-0 transition-opacity"
+                    x-show="userInput.length > 0"
+                    :class="{'opacity-100': userInput.length > 80}"
+                    x-text="userInput.length + '/2000'"
+                  ></div>
+                </div>
+                <div class="pr-2">
+                  <button
+                    @click="sendMessage()"
+                    class="bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 hover:scale-110 active:scale-90 text-white h-10 w-10 rounded-full flex items-center justify-center focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-md"
+                    :disabled="isLoading || !userInput.trim()"
+                  >
+                    <i
+                      class="fa-solid fa-paper-plane transform transition-all duration-300"
+                      :class="{'rotate-45': isLoading, 'fa-fade': isLoading}"
+                    ></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- User ID Modal -->
+    <div
+      class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
+      x-show="userIdModalOpen"
+      x-transition:enter="transition ease-out duration-300"
+      x-transition:enter-start="opacity-0"
+      x-transition:enter-end="opacity-100"
+      x-transition:leave="transition ease-in duration-200"
+      x-transition:leave-start="opacity-100"
+      x-transition:leave-end="opacity-0"
+      @click.self="userIdModalOpen = false"
+    >
+      <div
+        class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-xl max-w-md w-full mx-4"
+        x-show="userIdModalOpen"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 transform scale-95"
+        x-transition:enter-end="opacity-100 transform scale-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 transform scale-100"
+        x-transition:leave-end="opacity-0 transform scale-95"
+      >
+        <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+          Set User ID
+        </h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+          Enter a custom user ID or leave blank for anonymous user.
+        </p>
+
+        <div class="space-y-4">
+          <div>
+            <label
+              for="user-id"
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >User ID</label
+            >
+            <input
+              type="text"
+              id="user-id"
+              x-model="newUserId"
+              class="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+          </div>
+
+          <div class="flex justify-end space-x-3">
+            <button
+              @click="userIdModalOpen = false"
+              class="px-4 py-2 text-sm border dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md text-gray-700 dark:text-gray-300"
+            >
+              Cancel
+            </button>
+            <button
+              @click="updateUserId()"
+              class="px-4 py-2 text-sm bg-primary-500 hover:bg-primary-600 text-white rounded-md shadow-sm"
+            >
+              Update
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function chatApp() {
+        return {
+          userId: localStorage.getItem("userId") || "anonymous_user",
+          newUserId: "",
+          sessionId: localStorage.getItem("sessionId") || "",
+          userInput: "",
+          messages: [],
+          isLoading: false,
+          userIdModalOpen: false,
+          darkMode: localStorage.getItem("darkMode") === "true",
+          sidebarOpen: window.innerWidth >= 1024, // Open by default on large screens
+
+          init() {
+            this.checkSession();
+            this.scrollToBottom();
+
+            // Apply dark mode on initialization if set in localStorage
+            if (localStorage.getItem("darkMode") === "true") {
+              document.documentElement.classList.add("dark");
+            } // Auto-resize textarea with better animation
+            this.$watch("userInput", () => {
+              this.$nextTick(() => {
+                const textarea = this.$refs.inputField;
+                textarea.style.height = "auto";
+                const newHeight = Math.min(textarea.scrollHeight, 120);
+                textarea.style.height = newHeight + "px";
+
+                // Add a subtle animation effect to the chat container when typing
+                if (textarea.scrollHeight > 50) {
+                  document
+                    .getElementById("chatContainer")
+                    .classList.add("pb-10");
+                  setTimeout(() => {
+                    document.getElementById("chatContainer").scrollTop =
+                      document.getElementById("chatContainer").scrollHeight;
+                  }, 100);
+                }
+              });
+            });
+          },
+
+          toggleDarkMode() {
+            // Add transition effect
+            document.documentElement.classList.add("transition-colors");
+            document.documentElement.classList.add("duration-500");
+
+            // Toggle dark mode
+            this.darkMode = !this.darkMode;
+            localStorage.setItem("darkMode", this.darkMode);
+
+            // Force the dark mode on the HTML element
+            if (this.darkMode) {
+              document.documentElement.classList.add("dark");
+            } else {
+              document.documentElement.classList.remove("dark");
+            }
+
+            // Remove the transition classes after the animation completes
+            setTimeout(() => {
+              document.documentElement.classList.remove("transition-colors");
+              document.documentElement.classList.remove("duration-500");
+            }, 500);
+          },
+
+          async checkSession() {
+            if (!this.sessionId) {
+              await this.createSession();
+            }
+          },
+
+          async createSession() {
+            try {
+              const response = await fetch("/api/session/new", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ user_id: this.userId }),
+              });
+
+              if (response.ok) {
+                const data = await response.json();
+                this.sessionId = data.session_id;
+                localStorage.setItem("sessionId", this.sessionId);
+              }
+            } catch (error) {
+              console.error("Error creating session:", error);
+            }
+          },
+          async sendMessage() {
+            if (!this.userInput.trim() || this.isLoading) return;
+
+            const userMessage = this.userInput.trim();
+            this.messages.push({
+              role: "user",
+              message: userMessage,
+              timestamp: new Date().toISOString(),
+            });
+
+            this.userInput = "";
+            this.isLoading = true;
+            this.scrollToBottom();
+
+            try {
+              const response = await fetch("/api/query", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  query: userMessage,
+                  user_id: this.userId,
+                  session_id: this.sessionId,
+                }),
+              });
+
+              if (response.ok) {
+                const data = await response.json();
+                // Add a small delay before showing the response for a better UX
+                await new Promise((resolve) => setTimeout(resolve, 300));
+
+                this.messages.push({
+                  role: "assistant",
+                  message: data.response,
+                  timestamp: new Date().toISOString(),
+                  agent: this.getAgentName(data.agent_used),
+                });
+                this.sessionId = data.session_id;
+                localStorage.setItem("sessionId", this.sessionId);
+
+                // Auto-focus the input field after receiving a response
+                this.$nextTick(() => {
+                  this.$refs.inputField.focus();
+                });
+              } else {
+                const error = await response.json();
+                this.handleError(error.detail);
+              }
+
+              // Focus the input field after a short delay
+              setTimeout(() => {
+                this.$refs.inputField.focus();
+              }, 300);
+            } catch (error) {
+              this.handleError(error.message);
+            } finally {
+              this.isLoading = false;
+              this.scrollToBottom();
+            }
+          },
+
+          getAgentName(agentId) {
+            const agentMap = {
+              ai_tutor_orchestrator: "AI Tutor",
+              math_agent: "Math Agent",
+              physics_agent: "Physics Agent",
+              biology_agent: "Biology Agent",
+              chemistry_agent: "Chemistry Agent",
+              web_search_agent: "Web Search",
+            };
+
+            return agentMap[agentId] || "AI Tutor";
+          },
+
+          quickQuestion(question) {
+            this.userInput = question;
+            this.sendMessage();
+          },
+          async newSession() {
+            try {
+              // Clear current session
+              this.messages = [];
+
+              // Create new session
+              await this.createSession();
+
+              // Don't add welcome message to show the welcome screen with agent cards
+              // The welcome screen will be displayed since messages array is now empty
+            } catch (error) {
+              console.error("Error creating new session:", error);
+            }
+          },
+
+          openUserIdModal() {
+            this.newUserId = this.userId;
+            this.userIdModalOpen = true;
+          },
+
+          updateUserId() {
+            if (this.newUserId.trim()) {
+              this.userId = this.newUserId.trim();
+              localStorage.setItem("userId", this.userId);
+            } else {
+              this.userId = "anonymous_user";
+              localStorage.setItem("userId", this.userId);
+            }
+            this.userIdModalOpen = false;
+            this.newSession();
+          },
+
+          handleError(message) {
+            this.messages.push({
+              role: "assistant",
+              message: `Sorry, I encountered an error: ${message}. Please try again.`,
+              timestamp: new Date().toISOString(),
+            });
+          },
+
+          scrollToBottom() {
+            this.$nextTick(() => {
+              const container = document.getElementById("chatContainer");
+              container.scrollTop = container.scrollHeight;
+            });
+          },
+
+          formatTime(timestamp) {
+            if (!timestamp) return "";
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+          },
+          formatMessage(text) {
+            if (!text) return "";
+
+            // Convert markdown-style formatting
+            return (
+              text
+                // Bold
+                .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                // Italics
+                .replace(/\*(.*?)\*/g, "<em>$1</em>")
+                // Code blocks
+                .replace(
+                  /```(.*?)```/gs,
+                  '<pre class="bg-gray-100 dark:bg-gray-900 p-2 rounded my-2 overflow-x-auto"><code>$1</code></pre>'
+                )
+                // Inline code
+                .replace(
+                  /`(.*?)`/g,
+                  '<code class="bg-gray-100 dark:bg-gray-900 px-1 rounded">$1</code>'
+                )
+                // Line breaks
+                .replace(/\n/g, "<br>")
+            );
+          },
+
+          // Function to add animation to new messages
+          animateMessage(element) {
+            if (!element) return;
+
+            // Add subtle highlight animation
+            element.classList.add(
+              "bg-gradient-to-r",
+              "from-transparent",
+              "to-transparent"
+            );
+            element.style.backgroundSize = "200% 100%";
+            element.style.backgroundPosition = "100% 0";
+
+            setTimeout(() => {
+              element.style.transition = "background-position 1s ease-out";
+              element.style.backgroundPosition = "0% 0";
+            }, 100);
+
+            // Remove animation classes after it completes
+            setTimeout(() => {
+              element.classList.remove(
+                "bg-gradient-to-r",
+                "from-transparent",
+                "to-transparent"
+              );
+              element.style.backgroundSize = "";
+              element.style.backgroundPosition = "";
+              element.style.transition = "";
+            }, 1500);
+
+            // Scroll to view the new message
+            this.scrollToBottom();
+          },
+        };
+      }
+    </script>
+  </body>
+</html>
