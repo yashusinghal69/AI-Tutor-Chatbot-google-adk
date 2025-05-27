@@ -1,3 +1,10 @@
+## 🌐 Live Deployment
+
+The application is deployed and accessible at: [ai-tutor-chatbot-google-adk-production.up.railway.app]
+
+
+
+
 # AI Tutor Multi-Agent System
 
 A sophisticated educational chatbot powered by Google's Agent Development Kit (ADK) that provides personalized tutoring across multiple subjects including Mathematics, Physics, Biology, Chemistry and Web search for geneal query.
@@ -135,9 +142,7 @@ This AI Tutor system employs a multi-agent architecture where specialized agents
    - Open your browser and navigate to `http://localhost:8000`
    - The API documentation is available at `http://localhost:8000/docs`
 
-## 🌐 Live Deployment
 
-The application is deployed and accessible at: [Your Deployment URL]
 
 
 ## 🛠️ Development
