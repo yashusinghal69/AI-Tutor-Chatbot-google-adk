@@ -1,6 +1,6 @@
 ## 🌐 Live Deployment
 
-The application is deployed and accessible at: [ai-tutor-chatbot-google-adk-production.up.railway.app]
+The application is deployed and accessible at: [`ai-tutor-chatbot-google-adk-production.up.railway.app`](https://ai-tutor-chatbot-google-adk-production.up.railway.app/)
 
 
 
