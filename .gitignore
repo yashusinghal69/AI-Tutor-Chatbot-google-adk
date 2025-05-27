@@ -3,7 +3,6 @@
 .env.local
 .env.staging
 .venv
-**/__pycache__/
+__pycache__
+# __pycache__/
 .git
-*.pyc
-__pycache__/
