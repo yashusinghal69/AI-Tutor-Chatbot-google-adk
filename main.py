@@ -6,7 +6,9 @@ from pathlib import Path
 from datetime import datetime
 import json
 import logging
-import sys
+import sys 
+import uvicorn
+
 
 # Add current directory to path for imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -276,3 +278,7 @@ async def get_agents():
             }
         }
     }
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
